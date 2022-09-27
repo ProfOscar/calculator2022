@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -74,6 +75,16 @@ namespace Calculator2022
 
         private void ResultBox_TextChanged(object sender, EventArgs e)
         {
+            if (resultBox.TextLength > 0)
+            {
+                decimal num = decimal.Parse(resultBox.Text); string stOut = "";
+                NumberFormatInfo nfi = new CultureInfo("it-IT", false).NumberFormat;
+                int commaPosition = resultBox.Text.IndexOf(",");
+                nfi.NumberDecimalDigits = commaPosition == -1 ? 0 : resultBox.TextLength - commaPosition - 1;
+                stOut = num.ToString("N", nfi);
+                if (commaPosition == resultBox.TextLength - 1) stOut += ",";
+                resultBox.Text = stOut;
+            }
             int newSize = resultBoxTextSize - resultBox.TextLength + 12;
             if (newSize > 8 && newSize <= resultBoxTextSize)
             {
@@ -116,7 +127,7 @@ namespace Calculator2022
             if (btnStruct.IsNumber)
             {
                 if (resultBox.Text == "0") resultBox.Text = "";
-                resultBox.Text += clickedButton.Text;
+                if (resultBox.TextLength < 32) resultBox.Text += clickedButton.Text;
             }
             else
             {
@@ -128,6 +139,7 @@ namespace Calculator2022
                     {
                         case 'C':
                             resultBox.Text = "0";
+                            resultBox.Font = new Font("Segoe UI", resultBoxTextSize, FontStyle.Bold);
                             break;
                         case '←':
                             resultBox.Text = resultBox.Text.Remove(resultBox.TextLength - 1);
