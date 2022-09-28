@@ -17,7 +17,8 @@ namespace Calculator2022
         private int resultBoxTextSize = 24;
 
         private decimal operand1, operand2, result;
-        private char lastOperator;
+        private char lastOperator = ' ';
+        private BtnStruct lastButtonClicked;
 
         public struct BtnStruct
         {
@@ -133,7 +134,7 @@ namespace Calculator2022
             BtnStruct btnStruct = (BtnStruct)clickedButton.Tag;
             if (btnStruct.IsNumber)
             {
-                if (resultBox.Text == "0") resultBox.Text = "";
+                if (resultBox.Text == "0" || lastButtonClicked.IsOperator) resultBox.Text = "";
                 if (resultBox.TextLength < 32) resultBox.Text += clickedButton.Text;
             }
             else
@@ -158,11 +159,45 @@ namespace Calculator2022
                             break;
                     }
             }
+            lastButtonClicked = btnStruct;
         }
 
         private void ManageOperator(BtnStruct btnStruct)
         {
-            throw new NotImplementedException();
+            if (lastOperator == ' ')
+            {
+                operand1 = decimal.Parse(resultBox.Text);
+                lastOperator = btnStruct.Content;
+            }
+            else
+            {
+                if (!lastButtonClicked.IsEqualSign)
+                    operand2 = decimal.Parse(resultBox.Text);
+                switch (lastOperator)
+                {
+                    case '+':
+                        result = operand1 + operand2;
+                        break;
+                    case '-':
+                        result = operand1 - operand2;
+                        break;
+                    case 'x':
+                        result = operand1 * operand2;
+                        break;
+                    case '/':
+                        result = operand1 / operand2;
+                        break;
+                    default:
+                        break;
+                }
+                operand1 = result;
+                if (!btnStruct.IsEqualSign)
+                { 
+                    lastOperator = btnStruct.Content;
+                    // operand2 = 0;
+                }
+                resultBox.Text = result.ToString();
+            }
         }
     }
 }
