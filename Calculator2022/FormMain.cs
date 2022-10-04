@@ -155,7 +155,8 @@ namespace Calculator2022
                                 resultBox.Text = "0";
                             break;
                         default:
-                            ManageOperator(btnStruct);
+                            if (btnStruct.IsOperator || btnStruct.IsEqualSign)
+                                ManageOperator(btnStruct);
                             break;
                     }
             }
@@ -167,25 +168,27 @@ namespace Calculator2022
             if (lastOperator == ' ')
             {
                 operand1 = decimal.Parse(resultBox.Text);
-                lastOperator = btnStruct.Content;
+                if (!btnStruct.IsEqualSign) lastOperator = btnStruct.Content;
             }
             else
             {
                 if (!lastButtonClicked.IsEqualSign)
                     operand2 = decimal.Parse(resultBox.Text);
+                if (lastButtonClicked.IsEqualSign && btnStruct.IsOperator)
+                    lastOperator = ' ';
                 switch (lastOperator)
                 {
                     case '+':
-                        result = operand1 + operand2;
+                        if (lastButtonClicked.Content != '+') result = operand1 + operand2;
                         break;
                     case '-':
-                        result = operand1 - operand2;
+                        if (lastButtonClicked.Content != '-') result = operand1 - operand2;
                         break;
                     case 'x':
-                        result = operand1 * operand2;
+                        if (lastButtonClicked.Content != 'x') result = operand1 * operand2;
                         break;
                     case '/':
-                        result = operand1 / operand2;
+                        if (lastButtonClicked.Content != '/') result = operand1 / operand2;
                         break;
                     default:
                         break;
@@ -194,9 +197,17 @@ namespace Calculator2022
                 if (!btnStruct.IsEqualSign)
                 { 
                     lastOperator = btnStruct.Content;
-                    // operand2 = 0;
+                    if (lastButtonClicked.IsEqualSign) operand2 = 0;
                 }
-                resultBox.Text = result.ToString();
+                string stResult = result.ToString();
+                if (stResult.Contains(","))
+                {
+                    while (stResult.Substring(stResult.Length - 1) == "0")
+                        stResult = stResult.Substring(0, stResult.Length - 1);
+                    if (stResult.Substring(stResult.Length - 1) == ",")
+                        stResult = stResult.Substring(0, stResult.Length - 1);
+                }
+                resultBox.Text = stResult;
             }
         }
     }
