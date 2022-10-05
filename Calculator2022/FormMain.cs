@@ -19,6 +19,13 @@ namespace Calculator2022
         private decimal operand1, operand2, result;
         private char lastOperator = ' ';
         private BtnStruct lastButtonClicked;
+        private bool isBackspaceEnabled = false;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern bool HideCaret(IntPtr hWnd);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern int SendMessage(IntPtr hWnd, uint wMsg, UIntPtr wParam, IntPtr lParam);
 
         public struct BtnStruct
         {
@@ -72,18 +79,29 @@ namespace Calculator2022
         {
             resultBox = new RichTextBox();
             resultBox.ReadOnly = true;
+            //resultBox.SelectionIndent += 20;
+            SendMessage(resultBox.Handle, 0xd3, (UIntPtr)0x3, (IntPtr)0x00080008);
             resultBox.SelectionAlignment = HorizontalAlignment.Right;
             resultBox.Font = new Font("Segoe UI", resultBoxTextSize, FontStyle.Bold);
             resultBox.Width = this.Width - 16;
-            resultBox.Height = 120;
+            resultBox.Height = 110;
             resultBox.Text = "0";
+            resultBox.TabStop = false;
             resultBox.TextChanged += ResultBox_TextChanged;
+            resultBox.GotFocus += ResultBox_HideCaretHandler;
+            resultBox.MouseDown += ResultBox_HideCaretHandler;
+            resultBox.SelectionChanged += ResultBox_HideCaretHandler;
             this.Controls.Add(resultBox);
+        }
+
+        private void ResultBox_HideCaretHandler(object sender, EventArgs e)
+        {
+            HideCaret(resultBox.Handle);
         }
 
         private void ResultBox_TextChanged(object sender, EventArgs e)
         {
-            if (resultBox.TextLength > 0)
+            if (resultBox.TextLength > 0 && resultBox.Text != "-")
             {
                 decimal num = decimal.Parse(resultBox.Text); string stOut = "";
                 NumberFormatInfo nfi = new CultureInfo("it-IT", false).NumberFormat;
@@ -136,6 +154,7 @@ namespace Calculator2022
             {
                 if (resultBox.Text == "0" || lastButtonClicked.IsOperator) resultBox.Text = "";
                 if (resultBox.TextLength < 32) resultBox.Text += clickedButton.Text;
+                isBackspaceEnabled = true;
             }
             else
             {
@@ -146,21 +165,35 @@ namespace Calculator2022
                     switch (btnStruct.Content)
                     {
                         case 'C':
-                            resultBox.Text = "0";
-                            resultBox.Font = new Font("Segoe UI", resultBoxTextSize, FontStyle.Bold);
+                            ClearAll();
+                            isBackspaceEnabled = false;
                             break;
                         case '←':
-                            resultBox.Text = resultBox.Text.Remove(resultBox.TextLength - 1);
-                            if (resultBox.TextLength == 0 || resultBox.Text == "-")
-                                resultBox.Text = "0";
+                            if (isBackspaceEnabled)
+                            {
+                                resultBox.Text = resultBox.Text.Remove(resultBox.TextLength - 1);
+                                if (resultBox.TextLength == 0 || resultBox.Text == "-")
+                                    resultBox.Text = "0";
+                            }
                             break;
                         default:
                             if (btnStruct.IsOperator || btnStruct.IsEqualSign)
                                 ManageOperator(btnStruct);
+                            isBackspaceEnabled = false;
                             break;
                     }
             }
             lastButtonClicked = btnStruct;
+        }
+
+        private void ClearAll()
+        {
+            operand1 = 0;
+            operand2 = 0;
+            result = 0;
+            lastOperator = ' ';
+            resultBox.Text = "0";
+            resultBox.Font = new Font("Segoe UI", resultBoxTextSize, FontStyle.Bold);
         }
 
         private void ManageOperator(BtnStruct btnStruct)

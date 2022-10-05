@@ -37,6 +37,7 @@
             this.ClientSize = new System.Drawing.Size(320, 471);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Name = "FormMain";
+            this.ShowIcon = false;
             this.Text = "Calcolatrice";
             this.Load += new System.EventHandler(this.FormMain_Load);
             this.ResumeLayout(false);
