@@ -205,27 +205,28 @@ namespace Calculator2022
             }
             else
             {
-                if (!lastButtonClicked.IsEqualSign)
+                if (!lastButtonClicked.IsEqualSign && lastButtonClicked.Content != '←' || isBackspaceEnabled)
                     operand2 = decimal.Parse(resultBox.Text);
                 if (lastButtonClicked.IsEqualSign && btnStruct.IsOperator)
                     lastOperator = ' ';
-                switch (lastOperator)
-                {
-                    case '+':
-                        if (lastButtonClicked.Content != '+') result = operand1 + operand2;
-                        break;
-                    case '-':
-                        if (lastButtonClicked.Content != '-') result = operand1 - operand2;
-                        break;
-                    case 'x':
-                        if (lastButtonClicked.Content != 'x') result = operand1 * operand2;
-                        break;
-                    case '/':
-                        if (lastButtonClicked.Content != '/') result = operand1 / operand2;
-                        break;
-                    default:
-                        break;
-                }
+                if (lastButtonClicked.Content != '←' || (btnStruct.IsEqualSign && lastButtonClicked.Content == '←'))
+                    switch (lastOperator)
+                    {
+                        case '+':
+                            if (lastButtonClicked.Content != '+') result = operand1 + operand2;
+                            break;
+                        case '-':
+                            if (lastButtonClicked.Content != '-') result = operand1 - operand2;
+                            break;
+                        case 'x':
+                            if (lastButtonClicked.Content != 'x') result = operand1 * operand2;
+                            break;
+                        case '/':
+                            if (lastButtonClicked.Content != '/') result = operand1 / operand2;
+                            break;
+                        default:
+                            break;
+                    }
                 operand1 = result;
                 if (!btnStruct.IsEqualSign)
                 { 
